@@ -1,0 +1,16 @@
+Valerie Obenchain's recommendation:
+   I think it would be useful to create an S4 class to hold
+   your expression data, maybe called CellGrowth or 
+   CellDensity or something similar. You could extend the eSet 
+   class, see ?eSet. This would allow you to store the expression 
+   data and metadata in one object. You can take advantage of the 
+   preexisting accessors, subsetting etc. There is a vignette
+   in Biobase, "Notes for eSet developers" that maybe helpful,
+
+   http://bioconductor.org/packages/2.10/bioc/html/Biobase.html
+
+   Data read in with readYeastGrower() and readGenios() would 
+   be put into this new class. The functions would become
+   methods which would dispatch on the new class. For example,
+   fitCellGrowth, baranyi, gompertz, etc. would have methods
+   for the CellGrowth class.

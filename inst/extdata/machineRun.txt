@@ -1,0 +1,1 @@
+directory	filename	plate	media	use.	Plate1_YPMalt.txt	nonfloc_P1	YPMalt	TRUE.	Plate2_YPMalt.txt	nonfloc_P2	YPMalt	TRUE.	Plate1_YPFruc.txt	nonfloc_P1	YPFruc	TRUE.	Plate2_YPFruc.txt	nonfloc_P2	YPFruc	TRUE

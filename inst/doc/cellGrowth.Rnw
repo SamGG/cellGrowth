@@ -1,0 +1,183 @@
+\documentclass[a4paper]{article}
+\title{The \emph{cellGrowth} package}
+\author{Julien Gagneur, Andreas Neudecker}
+\date{1st March 2012}
+
+% The is for R CMD check, which finds it in spite of the "%", and also for
+% automatic creation of links in the HTML documentation for the package:
+
+% \VignetteIndexEntry{Overview of the cellGrowth package.}
+
+
+
+\begin{document}
+
+%%%%%%%% Setup
+
+% Do not reform code
+\SweaveOpts{keep.source=TRUE}
+
+% Size for figures
+\setkeys{Gin}{width=\textwidth}
+
+% R code and output non-italic
+% inspired from Ross Ihaka http://www.stat.auckland.ac.nz/~ihaka/downloads/Sweave-customisation.pdf
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{xleftmargin=0em}
+%\DefineVerbatimEnvironment{Soutput}{Verbatim}{xleftmargin=0em}
+\DefineVerbatimEnvironment{Scode}{Verbatim}{xleftmargin=0em}
+
+% Reduce characters per line in R output
+
+<<set_width, echo=FALSE>>=
+options( width = 60 )
+@ 
+
+% Make title
+\maketitle
+
+
+%%%%%%%% Main text
+
+\section{Introduction}
+Growth is a key cellular phenotype relevant in areas ranging from microbiology to cancer biology. Hence, quantitative measures of growth must be accurately estimated.
+Historically, many parametric models have been proposed, reviewed in (\cite{Zw1990}). However, in our experience, growth curves rarely follow these idealistic behaviours.
+In practice, non-parametric models, in which curves are simply smoothed to reduce noise in the data, do a better job for capturing all possible behaviours.
+
+This package provides fitting growth curves in non-parametric (local regression) and parametric models. It determines the maximum growth rate, e.g. generations per time unit, and the maximum of
+growths. It comes with neat plotting functions, automatic bandwidth selection for non-parametric models and handles data coming in well plate format.
+
+This vignette demonstrates the key features of \texttt{cellGrowth}, i.e fitting one growth curve, handling multiple machine runs for plates coming in 96-well plate format
+and automatic bandwidth selection. The last section describes how to handle custom data formats.
+
+\section{Fitting of one curve}
+We start with fitting one curve with local polynomial fitting, provided by the package \texttt{locfit}.
+The data comes from a 96-well plate with measurement every 15 minutes for a bit less than two days. 
+We below load the whole data and fit a growth curve for the well F2 and display the fit. We convert time
+from seconds into hours.
+
+<<loadlib>>=
+library(cellGrowth)
+@
+<<echo=false>>=
+options(continue=" ")
+@
+<<loadex, fig=TRUE>>=
+examplePath = system.file("extdata", package="cellGrowth")
+dat = readYeastGrower(file.path(examplePath,"Plate2_YPFruc.txt"))
+fit = fitCellGrowth(
+	x=dat$time,
+	z=log2(dat$OD[[which(getWellIdsTecan(dat) == "F02")]])
+	)
+plot(fit, scaleX=1/(60*60), xlab="time (hours)")
+@
+
+The fit object also contains the maximum growth rate, e.g. gerenerations per time unit, the maximum of growth
+and the datapoint where the maximum growth or the maximum is reached.
+<<attrex>>=
+attributes(fit)[c(3,4,5,6)]
+@
+
+\section{Experimental design with multiple machine runs}
+An experiment is a set of output files from different machine runs, each one on a specific plate.
+The experiment design is described by two further, tab-separated, files: a machine run file and a
+plate layout file.
+An example of a machine run file is provided
+<<filemachinerunex>>=
+mr_file = read.delim(file.path(examplePath,"machineRun.txt"))
+mr_file
+@
+It has \texttt{directory}, \texttt{filename} and \texttt{plate} for mandatory columns.
+
+We also provide the companion layout file
+<<fileplatelayoutex>>=
+pl_file = read.delim(file.path(examplePath,"plateLayout.txt"))
+head(pl_file)
+@
+It has \texttt{plate} and \texttt{well} for mandatory columns. \texttt{wellDataFrame} combines
+these two files into one single object of class well, essentially a data frame. The generic plotting function
+for this datatype plots a given plate using the function \texttt{plotPlate}.
+<<plateplot2ex, fig=TRUE, width=10,height=8>>=
+well = wellDataFrame(
+		file.path(examplePath,"plateLayout.txt"),
+		file.path(examplePath,"machineRun.txt")
+		)
+plot(well,labelColumn="strain",scaleX=1/3600,xlab="time in hours")
+@
+
+You can use the function \texttt{fitCellGrowths} to fit multiple growth curves at once.
+<<fitmultipleex>>=
+fits <- fitCellGrowths(well)
+@
+It returns a data frame with maximum growth rate, maximum and the time points at which the maximum growth rate and
+the maximum is reached.
+<<fitmultipleexhead>>=
+head(fits)
+@
+
+
+\section{Automatic bandwidth selection}
+Local polynomial fitting, as most smoothing procedures, depends on a bandwidth parameter. The larger
+the bandwidth, the smoother the fit. Too large bandwidth underestimate growth rates whereas too
+small ones tend to be sensitive to noise in the data. bandwidthCV() uses cross-validation to
+automatically select a bandwidth which gives good prediction on left out data as well as robust
+estimate of growth rate parameters.
+
+<<bandwidthex, keep.source=TRUE>>=
+## Not run:
+#	bw <- bandwidthCV(
+#		well,
+#		bandwidths=seq(0.5*3600,10*3600, length.out=30)
+#	)
+## End(Not run)
+@
+
+This call returns a list with the "optimal" bandwidth and data from the cross-validation, e.g. the
+squared error of the different bandwidths. Here you can see a plot of a fit with a too-low bandwidth
+<<toolowbwex, fig=TRUE>>=
+fit_small = fitCellGrowth(
+	x=dat$time,
+	z=log2(dat$OD[[which(getWellIdsTecan(dat) == "E09")]]),
+	locfit.h=1800
+	)
+plot(fit_small)
+@
+and one with the output from bandwidthCV
+<<rightbwex, fig=TRUE>>=
+fit_big = fitCellGrowth(
+	x=dat$time,
+	z=log2(dat$OD[[which(getWellIdsTecan(dat) == "E09")]]),
+	locfit.h=24000
+	)
+plot(fit_big)
+@
+
+\section{How do I use my own data format?}
+Data may come in any format and not necessarily from a well plate setup.
+Store your data in tab-separated file and load them into a data frame. Then call fitGrowthCurve(), as shown:
+<<owndataex>>=
+own_file = read.delim(file.path(examplePath,"customDataFormat.txt"))
+head(own_file)
+x = own_file[[1]]
+z = own_file[[2]]
+fit = fitCellGrowth(x,z)
+attr(fit,"maxGrowth")
+attr(fit,"pointOfMaxGrowth")
+@
+
+\begin{thebibliography}{10}
+
+\bibitem{Zw1990}
+Zwietering MH, Jongenburger I, Rombouts FM, van 't Riet K.
+\newblock Modeling of the Bacterial Growth Curve
+\newblock \textit{Applied and environmental biology} 56(6):1875-81
+
+\bibitem{Kelly1999}
+Kelly LA, Gibson G, Gettinby G, Donachie W, Low JC
+\newblock The use of dummy data points when fitting bacterial growth curves
+\newblock \textit{IMA Journal of Mathematics Applied in Medicine and Biology} 16(2):155-70
+
+
+\end{thebibliography}
+
+
+\end{document}

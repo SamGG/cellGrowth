@@ -1,0 +1,7 @@
+ver 0.99.0
+no dontrun in examples
+use system.file() instead of installed.packages() in examples
+renamed the example_files directory to extdata
+
+ver 0.4.0
+first submission
