@@ -15,3 +15,5 @@ export(readYeastGrower)
 export(rosso)
 export(standardWellId)
 export(wellDataFrame)
+
+importFrom(lattice, xyplot, strip.default)

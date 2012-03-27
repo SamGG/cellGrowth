@@ -6,11 +6,12 @@ Author: Julien Gagneur <julien.gagneur@embl.de>, Andreas Neudecker
     <a.neudecker@arcor.de>
 Description: This package provides functionalities for the fitting of
     cell population growth models on experimental OD curves.
-Version: 0.99.0
+Version: 0.99.1
 biocViews: CellBasedAssays, MicrotitrePlateAssay, DataImport,
         Visualization, TimeCourse
 Date: 2012-03-01
 Depends: R (>= 2.12.0), locfit (>= 1.5-4)
+Imports: lattice
 Collate: 'bandwidthCV.R' 'baranyi.R' 'fitCellGrowth.R'
         'fitCellGrowths.R' 'getRowColumn.R' 'getWellIdsTecan.R'
         'gompertz.R' 'guessCellGrowthParams.R' 'logistic.R'
