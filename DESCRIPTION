@@ -1,15 +1,15 @@
 Package: cellGrowth
-Maintainer: Julien Gagneur <julien.gagneur@embl.de>
+Maintainer: Julien Gagneur <gagneur@genzentrum.lmu.de>
 License: Artistic-2.0
 Title: Fitting cell population growth models
-Author: Julien Gagneur <julien.gagneur@embl.de>, Andreas Neudecker
+Author: Julien Gagneur <gagneur@genzentrum.lmu.de>, Andreas Neudecker
     <a.neudecker@arcor.de>
 Description: This package provides functionalities for the fitting of
     cell population growth models on experimental OD curves.
-Version: 1.1.0
+Version: 1.1.1
 biocViews: CellBasedAssays, MicrotitrePlateAssay, DataImport,
         Visualization, TimeCourse
-Date: 2012-03-01
+Date: 2012-07-30
 Depends: R (>= 2.12.0), locfit (>= 1.5-4)
 Imports: lattice
 Collate: 'bandwidthCV.R' 'baranyi.R' 'fitCellGrowth.R'
