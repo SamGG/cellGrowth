@@ -6,7 +6,7 @@ Author: Julien Gagneur <gagneur@genzentrum.lmu.de>, Andreas Neudecker
     <a.neudecker@arcor.de>
 Description: This package provides functionalities for the fitting of
     cell population growth models on experimental OD curves.
-Version: 1.11.0
+Version: 1.12.0
 biocViews: CellBasedAssays, MicrotitrePlateAssay, DataImport,
         Visualization, TimeCourse
 Date: 2012-07-30
